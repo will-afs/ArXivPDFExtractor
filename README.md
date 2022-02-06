@@ -24,8 +24,8 @@ The project configuration holds in the project_config.toml file.
 --------------------------
 These steps are detailed for each one of the two programs.
 See their respective README.md files to have more information on each :
-- ["ArXivParser README.md"](https://github.com/will-afs/ArXivPDFExtractor/src/ArXivParser/README.md)
-- ["PDFExtractor README.md"](https://github.com/will-afs/ArXivPDFExtractor/src/PDFExtractor/README.md)
+- [ArXivParser README.md](https://github.com/will-afs/ArXivPDFExtractor/src/ArXivParser/README.md)
+- [PDFExtractor README.md](https://github.com/will-afs/ArXivPDFExtractor/src/PDFExtractor/README.md)
     
 🧪 Running tests
 -----------------
