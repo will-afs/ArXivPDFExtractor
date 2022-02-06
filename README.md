@@ -1,7 +1,7 @@
 # <img src="https://github.com/will-afs/AdvancedAcademicProject/blob/main/doc/ArXivParser.png" width="30"> <img src="https://github.com/will-afs/AdvancedAcademicProject/blob/main/doc/PDFExtractor.png" width="30"> ArXivPDFExtractor
 Solution to populate a database with data extracted from scientific articles (PDFs) available on ArXiv.org
 
-This is a sub-project of the ["AdvancedAcademicProject"](https://github.com/will-afs/AdvancedAcademicProject/)
+This is a sub-project of the [AdvancedAcademicProject](https://github.com/will-afs/AdvancedAcademicProject/)
 
 It contains two programs :
 
