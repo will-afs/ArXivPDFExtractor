@@ -5,16 +5,16 @@ This is a sub-project of the ["AdvancedAcademicProject"](https://github.com/will
 
 It contains two programs :
 
-- [<img src="https://github.com/will-afs/AdvancedAcademicProject/blob/main/ArXivParser.png" width="30"> ArXivParser](https://github.com/will-afs/ArXivPDFExtractor/src/ArXivParser) (involved in step 1)
-- [<img src="https://github.com/will-afs/AdvancedAcademicProject/blob/main/PDFExtractor.png" width="30"> PDFExtractor](https://github.com/will-afs/ArXivPDFExtractor/src/PDFExtractor) (involved in step 2)
+- [<img src="https://github.com/will-afs/AdvancedAcademicProject/blob/main/doc/ArXivParser.png" width="30"> ArXivParser](https://github.com/will-afs/ArXivPDFExtractor/src/ArXivParser) (involved in step 1)
+- [<img src="https://github.com/will-afs/AdvancedAcademicProject/blob/main/doc/PDFExtractor.png" width="30"> PDFExtractor](https://github.com/will-afs/ArXivPDFExtractor/src/PDFExtractor) (involved in step 2)
 
 🤖 **Step 1**
 
-<img src="https://github.com/will-afs/AdvancedAcademicProject/blob/main/Step%201.JPG" width="700">
+<img src="https://github.com/will-afs/AdvancedAcademicProject/blob/main/doc/Step%201.JPG" width="700">
 
 ⛏️ **Step 2**
 
-<img src="https://github.com/will-afs/AdvancedAcademicProject/blob/main/Step%202.JPG" width="700">
+<img src="https://github.com/will-afs/AdvancedAcademicProject/blob/main/doc/Step%202.JPG" width="700">
 
 ⚙️ Configuration
 -----------------
