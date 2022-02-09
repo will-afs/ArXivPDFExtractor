@@ -12,3 +12,7 @@ max_results = 1000
   [["possible_cat"]]
   id = 1
   value = 'cs.ai'
+
+["PDFExtractor"]
+broker_url = "redis://localhost:6379/0"
+backend_url = "db+sqlite:///db.sqlite3"

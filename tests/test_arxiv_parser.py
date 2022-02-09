@@ -1,11 +1,6 @@
 import configparser
 
-from io import BytesIO
-
-from pdfminer.pdfparser import PDFSyntaxError
 import pytest
-
-import src.arxivparser.core.arxiv_parser
 
 import time
 import threading

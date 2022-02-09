@@ -1,3 +1,5 @@
+from src.pdfextractor.core.pdf_extractor import extract_data_from_pdf_uri_task
+
 import urllib.request
 
 from typing import List
@@ -118,7 +120,7 @@ class ArXivParser():
         return pdf_uris
 
     def _push_to_task_queue(self, pdf_uri):
-        pass
+        extract_data_from_pdf_uri_task.delay(pdf_uri)
 
     def fetch_new_pdf_uris(self):
         """Fetch new PDF URIs from ArXiv.org API and creates tasks for each one of them to extract them asynchronously 

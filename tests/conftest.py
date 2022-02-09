@@ -48,3 +48,9 @@ def reference_pdf_uris():
     with open(DATA_FILE_PATH + REFERENCE_PDF_URIS_FILE_NAME, "r") as reference_pdf_uris_file:
         reference_pdf_uris = [pdf_uri.replace('\n', '') for pdf_uri in reference_pdf_uris_file.readlines()] 
     return reference_pdf_uris
+
+@pytest.fixture
+def pdf_bytes():
+    with open(DATA_FILE_PATH + PDF_DATA_FILE_NAME, "rb") as pdf_file:
+        pdf_bytes = pdf_file.read()
+    return pdf_bytes
