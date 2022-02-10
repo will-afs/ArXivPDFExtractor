@@ -1,3 +1,6 @@
+from src.cooldown_manager_utils import get_permission_to_request_arxiv
+
+from http.client import HTTPResponse
 import urllib
 from io import BytesIO
 from typing import List
@@ -7,24 +10,53 @@ from pdfminer.pdfparser import PDFParser
 from PyPDF2 import PdfFileReader
 import pdftotext
 
-def get_file_object_from_uri(file_uri: str) -> BytesIO:
+import validators
+
+
+def request_file_through_uri(file_uri: str, cooldown_manager_uri:str) -> HTTPResponse :
+    """Request a file through the provided URI, after having obtained permission to cooldown manager
+
+    Parameters:
+    file_uri (str) : the URI to access the file
+    cooldown_manager_uri (str) : the URI through which ask permission to CooldownManager
+
+    Returns:
+    HTTPResponse: the response obtained from the server
+    """
+    if not validators.url(file_uri):
+        raise ValueError(
+                            "Wrong URI format for 'file_uri' argument.\
+                            Expected an url-like string. Example 'https://export.arxiv.org/api/'"
+                        )
+    if not validators.url(cooldown_manager_uri):
+        raise ValueError(
+                            "Wrong URI format for 'file_uri' argument.\
+                            Expected an url-like string. Example 'http://172.17.0.2:5000/'"
+                        )
+    elif get_permission_to_request_arxiv(cooldown_manager_uri):
+        try:
+            response = urllib.request.urlopen(file_uri)
+        except urllib.error.HTTPError:
+            raise FileNotFoundError("Could not access the provided URI")
+        else:
+            file = response.read()
+            return file
+    else:
+        raise ConnectionRefusedError('CooldownManager refused permission to connect to ArXiv.org')
+    
+
+def get_file_object_from_uri(file_uri: str, cooldown_manager_uri:str) -> BytesIO:
     """Return a Python File Object obtained from an URI
     Parameters:
     file_uri (str) : the URI to access the file
     Returns:
     io.BytesIO: File object corresponding to the file being pointed by the URI
     """
-    try:
-        response = urllib.request.urlopen(file_uri)
-    except urllib.error.HTTPError:
-        raise FileNotFoundError("Could not access the provided URI")
-    except ValueError:
-        raise ValueError("Wrong URI format")
-    else:
-        pdf= response.read()
-        pdf_bytesio_file_object = BytesIO()
-        pdf_bytesio_file_object.write(pdf)
-        return pdf_bytesio_file_object
+
+    pdf = request_file_through_uri(file_uri, cooldown_manager_uri)
+    pdf_bytesio_file_object = BytesIO()
+    pdf_bytesio_file_object.write(pdf)
+    return pdf_bytesio_file_object
 
 def extract_pdf_raw_data_from_pdf_miner(file_obj:BytesIO, pdf_uri) -> List:
     pdf_parser = PDFParser(file_obj)
@@ -66,10 +98,12 @@ def extract_pdf_raw_data_from_pypdf_and_pdftotext(file_obj:BytesIO, pdf_uri) -> 
     pdf_content = pdftotext.PDF(file_obj)
     return pdf_metadata, pdf_content
 
-def extract_data_from_pdf_uri(pdf_uri:str) -> List:
+def extract_data_from_pdf_uri(pdf_uri:str, cooldown_manager_uri:str) -> List:
     """Extracts data from a PDF being pointed by a URI
     Parameters:
     pdf_uri (str) : the URI through which access the file
+    cooldown_manager_uri (str) : the URI through which ask permission to CooldownManager
+
     Returns:
     dict: metadata of the PDF, presented as a JSON structured as follows :
         {
@@ -81,8 +115,7 @@ def extract_data_from_pdf_uri(pdf_uri:str) -> List:
         }
     str: PDF content
     """
-    # TODO : request permission to CooldownManager to request ArXiv
-    file_obj = get_file_object_from_uri(pdf_uri)
+    file_obj = get_file_object_from_uri(pdf_uri, cooldown_manager_uri)
     pdf_metadata, pdf_content = extract_pdf_raw_data_from_pdf_miner(file_obj, pdf_uri)
 
     return pdf_metadata, pdf_content

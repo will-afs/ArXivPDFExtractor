@@ -1,3 +1,4 @@
+from src.cooldown_manager_utils import get_permission_to_request_arxiv
 from src.pdfextractor.core.pdf_extractor import extract_data_from_pdf_uri_task
 
 import urllib.request
@@ -69,16 +70,6 @@ class ArXivParser():
         except TypeError:
                 raise TypeError("Wrong type for 'time_step' argument. Expected an int value strictly superior to 0")
 
-    def _get_permission_to_request_arxiv(self):
-        """Request permission to contact ArXiv.org API to the CooldownManager of the project
-
-        Parameters:
-
-        Returns:
-        bool : True if the CooldownManager gave its permission, False otherwise
-        """
-        return urllib.request.urlopen(self._cooldown_manager_uri)
-
     def _fetch_atom_feed_from_arxiv_api(
                                             self,
                                             start:int=0,
@@ -96,7 +87,7 @@ class ArXivParser():
             self._cat, start, self._max_results
         )
         uri = self._arxiv_url + query
-        if self._get_permission_to_request_arxiv():
+        if get_permission_to_request_arxiv(self._cooldown_manager_uri):
             bytes_feed = urllib.request.urlopen(uri)
             return bytes_feed
         else:

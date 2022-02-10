@@ -1,35 +1,32 @@
+from tests.conftest import (
+                        DATA_FILE_PATH,
+                        PDF_DATA_FILE_NAME,
+                        PDF_CONTENT_REFERENCE,
+                        PDF_METADATA_REFERENCE,
+                        PDF_URI,
+                        NOT_FOUND_PDF_URI,
+                        NOT_PDF_URI,
+                        WRONG_URI,
+                        FEED_DATA_FILE_NAME,
+                        REFERENCE_PDF_URIS_FILE_NAME,
+                        COOLDOWN_MANAGER_URI
+)
+
+
 from src.pdfextractor.core.pdf_extractor_utils import (
                                                     get_file_object_from_uri,
                                                     extract_data_from_pdf_uri,                                                   
 )
 
-import configparser
 from io import BytesIO
 
 import json
 import pytest
 
-from pdfminer.pdfparser import PDFSyntaxError
-
-config = configparser.ConfigParser()
-TESTS_DIRECTORY = "./tests"
-config.read(TESTS_DIRECTORY + "/setup.cfg")
-
-DATA_FILE_PATH = config["PATHS"]["DATA_FILE_PATH"]
-PDF_DATA_FILE_NAME = config["PATHS"]["PDF_DATA_FILE_NAME"]
-PDF_CONTENT_REFERENCE = config["PATHS"]["PDF_CONTENT_REFERENCE"]
-PDF_METADATA_REFERENCE = config["PATHS"]["PDF_METADATA_REFERENCE"]
-WRONG_PDF_URI = config["PATHS"]["WRONG_PDF_URI"]
-NOT_FOUND_PDF_URI = config["PATHS"]["NOT_FOUND_PDF_URI"]
-NOT_PDF_URI = config["PATHS"]["NOT_PDF_URI"]
-PDF_URI = config["PATHS"]["PDF_URI"]
-
 def test_get_file_object_from_uri_success(pdf_bytes, mocker):
-    # TODO : mock the urlopen function with a dummy PDF
-    #mocker.patch('src.pdfextractor.core.pdf_extractor.urllib.request.urlopen', return_value = pdf_bytes)
-
+    mocker.patch('src.pdfextractor.core.pdf_extractor_utils.request_file_through_uri', return_value = pdf_bytes)
     # Create File Object from PDF URI
-    file_object = get_file_object_from_uri(PDF_URI)
+    file_object = get_file_object_from_uri(PDF_URI, COOLDOWN_MANAGER_URI)
     # Check file_object is of type io.BytesIO
     assert type(file_object) == BytesIO
 
@@ -41,16 +38,19 @@ def test_get_file_object_from_uri_success(pdf_bytes, mocker):
     # Check both File Objects contents are same
     assert file_object.readlines() == ref_file_object.readlines()
 
-def test_get_file_object_from_uri_wrong_uri_format():
+def test_get_file_object_from_uri_wrong_uri_format(mocker):
     with pytest.raises(ValueError):
-        get_file_object_from_uri(WRONG_PDF_URI)
+        mocker.patch('src.pdfextractor.core.pdf_extractor_utils.get_permission_to_request_arxiv', return_value = True)
+        get_file_object_from_uri(WRONG_URI, COOLDOWN_MANAGER_URI)
 
-def test_get_file_object_from_uri_not_found_pdf_uri():
+def test_get_file_object_from_uri_not_found_pdf_uri(mocker):
     with pytest.raises(FileNotFoundError):
-        get_file_object_from_uri(NOT_FOUND_PDF_URI)
+        mocker.patch('src.pdfextractor.core.pdf_extractor_utils.get_permission_to_request_arxiv', return_value = True)
+        get_file_object_from_uri(NOT_FOUND_PDF_URI, COOLDOWN_MANAGER_URI)
 
-def test_extract_data_from_pdf_uri_success():
-    extracted_metadata, extracted_content = extract_data_from_pdf_uri(PDF_URI)
+def test_extract_data_from_pdf_uri_success(pdf_bytes, mocker):
+    mocker.patch('src.pdfextractor.core.pdf_extractor_utils.request_file_through_uri', return_value = pdf_bytes)
+    extracted_metadata, extracted_content = extract_data_from_pdf_uri(PDF_URI, COOLDOWN_MANAGER_URI)
     # Checks metadata
     with open(
         DATA_FILE_PATH + PDF_METADATA_REFERENCE, "r"
@@ -64,10 +64,12 @@ def test_extract_data_from_pdf_uri_success():
         reference_content = pdf_content_reference_file.read()
     assert extracted_content == reference_content
 
-def test_extract_data_from_pdf_uri_wrong_uri():
+def test_extract_data_from_pdf_uri_wrong_uri(mocker):
+    mocker.patch('src.pdfextractor.core.pdf_extractor_utils.get_permission_to_request_arxiv', return_value = True)
     with pytest.raises(ValueError):
-        extract_data_from_pdf_uri(WRONG_PDF_URI)
+        extract_data_from_pdf_uri(WRONG_URI, COOLDOWN_MANAGER_URI)
 
-def test_extract_data_from_pdf_uri_not_found():
+def test_extract_data_from_pdf_uri_not_found(mocker):
+    mocker.patch('src.pdfextractor.core.pdf_extractor_utils.get_permission_to_request_arxiv', return_value = True)
     with pytest.raises(FileNotFoundError):
-        extract_data_from_pdf_uri(NOT_FOUND_PDF_URI)
+        extract_data_from_pdf_uri(NOT_FOUND_PDF_URI, COOLDOWN_MANAGER_URI)
