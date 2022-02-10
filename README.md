@@ -45,6 +45,8 @@ By default, this command should make the service accessible at the address : red
 
 **Installing PostgreSQL**
 
+*Note : Ubuntu includes PostgreSQL by default*
+
 Refer to the PostgreSQL
 [Installing PostgreSQL](https://www.postgresql.org/docs/12/installation.html) for example
 
