@@ -7,8 +7,6 @@ from typing import List
 from pdfminer.high_level import extract_text
 from pdfminer.pdfdocument import PDFDocument
 from pdfminer.pdfparser import PDFParser
-from PyPDF2 import PdfFileReader
-import pdftotext
 
 import validators
 
@@ -45,7 +43,7 @@ def request_file_through_uri(file_uri: str, cooldown_manager_uri:str) -> HTTPRes
         raise ConnectionRefusedError('CooldownManager refused permission to connect to ArXiv.org')
     
 
-def get_file_object_from_uri(file_uri: str, cooldown_manager_uri:str) -> BytesIO:
+def get_file_object_from_uri(file_uri: str, cooldown_manager_uri:str) -> BytesIO :
     """Return a Python File Object obtained from an URI
     Parameters:
     file_uri (str) : the URI to access the file
@@ -53,12 +51,12 @@ def get_file_object_from_uri(file_uri: str, cooldown_manager_uri:str) -> BytesIO
     io.BytesIO: File object corresponding to the file being pointed by the URI
     """
 
-    pdf = request_file_through_uri(file_uri, cooldown_manager_uri)
+    pdf_bytes = request_file_through_uri(file_uri, cooldown_manager_uri)
     pdf_bytesio_file_object = BytesIO()
-    pdf_bytesio_file_object.write(pdf)
+    pdf_bytesio_file_object.write(pdf_bytes)
     return pdf_bytesio_file_object
 
-def extract_pdf_raw_data_from_pdf_miner(file_obj:BytesIO, pdf_uri) -> List:
+def extract_pdf_raw_data(file_obj:BytesIO, pdf_uri) -> List:
     pdf_parser = PDFParser(file_obj)
     doc = PDFDocument(pdf_parser)
 
@@ -73,29 +71,6 @@ def extract_pdf_raw_data_from_pdf_miner(file_obj:BytesIO, pdf_uri) -> List:
         pdf_content = extract_text(file_obj)
     except TypeError:
         raise TypeError('Something went wrong in the PDF content extraction, due to a bug in pdfminer library')
-    return pdf_metadata, pdf_content
-
-
-def extract_pdf_raw_data_from_pypdf_and_pdftotext(file_obj:BytesIO, pdf_uri) -> List:
-    # 1. Extract PDF Metadata
-    pdf = PdfFileReader(file_obj)
-    info = pdf.getDocumentInfo()
-    # number_of_pages = pdf.getNumPages()
-    # author = info.author
-    # creator = info.creator
-    # producer = info.producer
-    # subject = info.subject
-    # title = info.title
-    pdf_metadata = {
-                        'uri':pdf_uri,
-                        'author':info.author,
-                        'producer':info.producer,
-                        'subject':info.subject,
-                        'title':info.title,
-                        # 'creator':info.creator,
-    }
-    # 2. Extracting PDF content
-    pdf_content = pdftotext.PDF(file_obj)
     return pdf_metadata, pdf_content
 
 def extract_data_from_pdf_uri(pdf_uri:str, cooldown_manager_uri:str) -> List:
@@ -116,6 +91,6 @@ def extract_data_from_pdf_uri(pdf_uri:str, cooldown_manager_uri:str) -> List:
     str: PDF content
     """
     file_obj = get_file_object_from_uri(pdf_uri, cooldown_manager_uri)
-    pdf_metadata, pdf_content = extract_pdf_raw_data_from_pdf_miner(file_obj, pdf_uri)
+    pdf_metadata, pdf_content = extract_pdf_raw_data(file_obj, pdf_uri)
 
     return pdf_metadata, pdf_content

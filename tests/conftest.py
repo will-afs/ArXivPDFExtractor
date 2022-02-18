@@ -4,6 +4,8 @@ from src.arxivparser.core.arxiv_parser import (
 )
 
 import configparser
+from io import BytesIO
+import json
 import pytest
 
 
@@ -54,3 +56,23 @@ def pdf_bytes():
     with open(DATA_FILE_PATH + PDF_DATA_FILE_NAME, "rb") as pdf_file:
         pdf_bytes = pdf_file.read()
     return pdf_bytes
+    
+@pytest.fixture
+def pdf_bytesio():
+    with open(DATA_FILE_PATH + PDF_DATA_FILE_NAME, "rb") as pdf_file:
+        pdf_bytes = pdf_file.read()
+    pdf_bytesio_file_object = BytesIO()
+    pdf_bytesio_file_object.write(pdf_bytes)
+    return pdf_bytesio_file_object
+
+@pytest.fixture
+def pdf_content_reference():
+    with open(DATA_FILE_PATH + PDF_CONTENT_REFERENCE, "r") as pdf_content_reference_file:
+        pdf_content_reference = pdf_content_reference_file.read()
+    return pdf_content_reference
+
+@pytest.fixture
+def pdf_metadata_reference():
+    with open(DATA_FILE_PATH + PDF_METADATA_REFERENCE, "r") as pdf_metadata_reference_file:
+        pdf_metadata_reference = json.load(pdf_metadata_reference_file)
+    return pdf_metadata_reference
