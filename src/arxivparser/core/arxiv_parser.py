@@ -1,9 +1,7 @@
 from src.cooldown_manager_utils import get_permission_to_request_arxiv
-from src.pdfextractor.core.pdf_extractor import extract_data_from_pdf_uri_task
+from src.pdfextractor.core.pdf_extractor import extract_pdf_references_task
 
 import urllib.request
-
-from typing import List
 
 from bs4 import BeautifulSoup
 import threading
@@ -93,28 +91,50 @@ class ArXivParser():
         else:
             raise ConnectionRefusedError('CooldownManager refused permission to connect to ArXiv.org')
 
-    def _extract_pdf_uris_from_atom_feed(self, feed: bytes) -> List:
-        """Extract PDF URIs from an Atom feed
+    def _extract_pdf_metadatas_from_atom_feed(self, feed: bytes) -> list:
+        """Extract PDF URIs and authors from an Atom feed
 
         Parameters:
         feed (bytes) : the Atom bytes feed from which extract PDF URIs
 
         Returns:
-        List : List of PDF URIs as strings
+        list : List of PDF URI and authors as dict
         """
         
         soup = BeautifulSoup(feed, features="html.parser")
-        pdf_uris = []
-        for link in soup.find_all("link"):
-            if link.get("title") == "pdf":
-                pdf_uris.append(link.get("href"))
-        return pdf_uris
+        pdf_metadatas = []
+        results = soup.find_all("entry")
+        for result in results:
+            pdf_metadata = {
+                'uri':None,
+                'title':None,
+                'authors':[],
+            }
+            # Extract pdf uri
+            links = result.find_all("link")
+            for link in links:
+                if link.get("title") == "pdf":
+                    pdf_metadata['uri']  = link.get("href")
+            
+            # Extract authors
+            authors_names = []
+            authors_tags = result.find_all("author")
+            for author_tag in authors_tags:
+                pdf_metadata['authors'].append(author_tag.find("name").next)
+
+            # Extract title
+            pdf_metadata['title'] = result.find("title").next
+
+            pdf_metadatas.append(pdf_metadata)
+            
+        return pdf_metadatas
 
     def _push_to_task_queue(self, pdf_uri):
         extract_data_from_pdf_uri_task.delay(pdf_uri)
 
-    def fetch_new_pdf_uris(self):
-        """Fetch new PDF URIs from ArXiv.org API and creates tasks for each one of them to extract them asynchronously 
+    def fetch_new_pdf_metadatas(self):
+        """Fetch new PDF URIs and authors from ArXiv.org API \
+            and creates tasks for each one of them to extract them asynchronously 
 
         Parameters:
 
@@ -133,13 +153,13 @@ class ArXivParser():
                                                                 )
 
             # Extract PDF URIs from it
-            pdf_uris_in_feed = self._extract_pdf_uris_from_atom_feed(atom_bytes_feed)
+            pdf_metadatas = self._extract_pdf_metadatas_from_atom_feed(atom_bytes_feed)
 
             # Append them to the task queue
-            if pdf_uris_in_feed:  # Check whether pdf_uris_in_feed is empty or not
+            if pdf_metadatas:  # Check whether pdf_metadatas is empty or not
                 # add them to the task queue
-                for pdf_uri in pdf_uris_in_feed:
-                    self._push_to_task_queue(pdf_uri)
+                for pdf_metadata in pdf_metadatas:
+                    self._push_to_task_queue(pdf_metadata)
             else:  # Means that there is no more pdf_uri to extract from ArXiv.org API
                 no_more_pdf_to_fetch = True
         no_more_pdf_to_fetch = False
@@ -147,7 +167,7 @@ class ArXivParser():
     def _run(self):
         while not self._stopping:
             with self._fetch_lock:
-                self.fetch_new_pdf_uris()
+                self.fetch_new_pdf_metadatas()
             time.sleep(self._time_step)
 
     def start_cron(self):
