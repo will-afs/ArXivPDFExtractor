@@ -1,4 +1,4 @@
-from src.pdfextractor.core.pdf_extractor_utils import extract_pdf_references
+from src.pdfextractor.core.pdf_extractor_utils import extract_pdf
 
 import celery
 import toml
@@ -15,10 +15,9 @@ app = celery.Celery(
             )
 
 @app.task
-def extract_pdf_references_task(pdf_metadata:dict) -> List:
+def extract_pdf_task(pdf_metadata:dict) -> List:
     print("Task called with argument : " + pdf_metadata['uri'])
     # return extract_pdf_references(pdf_uri)
-
 
 if __name__ == '__main__':
     app.start()

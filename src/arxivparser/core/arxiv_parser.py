@@ -1,5 +1,5 @@
 from src.cooldown_manager_utils import get_permission_to_request_arxiv
-from src.pdfextractor.core.pdf_extractor import extract_pdf_references_task
+from src.pdfextractor.core.pdf_extractor import extract_pdf_task
 
 import urllib.request
 
@@ -45,7 +45,6 @@ class ArXivParser():
                                         cooldown_manager_uri:str="http://172.17.0.2:5000/",
                                         time_step:int=604800
                                     ):
-        # TODO: to test
         if (not type(arxiv_url) == str or not validators.url(arxiv_url)):
             raise ValueError("Wrong value for 'arxiv_url' argument. Expected an url-like string. Example 'http://www.google.com'")
 
@@ -117,7 +116,6 @@ class ArXivParser():
                     pdf_metadata['uri']  = link.get("href")
             
             # Extract authors
-            authors_names = []
             authors_tags = result.find_all("author")
             for author_tag in authors_tags:
                 pdf_metadata['authors'].append(author_tag.find("name").next)
@@ -130,7 +128,7 @@ class ArXivParser():
         return pdf_metadatas
 
     def _push_to_task_queue(self, pdf_uri):
-        extract_data_from_pdf_uri_task.delay(pdf_uri)
+        extract_pdf_task.delay(pdf_uri)
 
     def fetch_new_pdf_metadatas(self):
         """Fetch new PDF URIs and authors from ArXiv.org API \
@@ -141,8 +139,7 @@ class ArXivParser():
         Returns:
         """
         # Look for index of last PDF in database
-        # TODO : fetch it
-        last_pdf_in_db_idx = 0
+        last_pdf_in_db_idx = 0 # Could fetch it in a future version
 
         no_more_pdf_to_fetch = False
         i=0
