@@ -19,11 +19,11 @@ app = celery.Celery(
 @app.task
 def extract_pdf_task(pdf_metadata:dict) -> List:
     # print("Task called with argument : " + pdf_metadata['uri'])
+    pdf_urn = pdf_metadata['uri'].replace('http://arxiv.org/pdf/cs/', '')
     try:
         pdf_dict = extract_pdf(pdf_metadata, cooldown_manager_uri)
     except:
         return 'Extraction failed for PDF with URN \"' + pdf_urn + '\"'
-    pdf_urn = pdf_metadata['uri'].replace('http://arxiv.org/pdf/cs/', '')
     json_object = json.dumps(pdf_dict, indent = 4)
     with open("{}.json".format(pdf_urn), "w") as outfile:
         outfile.write(json_object)
