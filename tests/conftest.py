@@ -27,7 +27,8 @@ PDF_CONTENT_REFERENCE_FILE_NAME = config["REFERENCES"]["PDF_CONTENT_REFERENCE_FI
 PDF_METADATA_REFERENCE_FILE_NAME = config["REFERENCES"]["PDF_METADATA_REFERENCE_FILE_NAME"]
 FEED_DATA_REFERENCE_FILE_NAME = config["REFERENCES"]["FEED_DATA_REFERENCE_FILE_NAME"]
 PDF_METADATAS_REFERENCE_FILE_NAME = config["REFERENCES"]["PDF_METADATAS_REFERENCE_FILE_NAME"]
-REFERENCES_REFERENCE_FILE_NAME = config["REFERENCES"]["REFERENCES_REFERENCE_FILE_NAME"]
+CLEAN_REFERENCES_REFERENCE_FILE_NAME = config["REFERENCES"]["CLEAN_REFERENCES_REFERENCE_FILE_NAME"]
+REFEXTRACT_REFERENCES_REFERENCE_FILE_NAME = config["REFERENCES"]["REFEXTRACT_REFERENCES_REFERENCE_FILE_NAME"]
 
 
 # [ArXivParser]
@@ -57,7 +58,13 @@ def pdf_metadatas_reference():
     return pdf_metadatas_reference
 
 @pytest.fixture
-def references_reference():
-    with open(DATA_FILE_PATH + REFERENCES_REFERENCE_FILE_NAME, "r") as pdf_metadata_reference_file:
-        pdf_metadata_reference = json.load(pdf_metadata_reference_file)
-    return pdf_metadata_reference
+def clean_references_reference():
+    with open(DATA_FILE_PATH + CLEAN_REFERENCES_REFERENCE_FILE_NAME, "r") as clean_references_reference_file:
+        clean_references_reference = json.load(clean_references_reference_file)
+    return clean_references_reference
+
+@pytest.fixture
+def refextract_references_reference():
+    with open(DATA_FILE_PATH + REFEXTRACT_REFERENCES_REFERENCE_FILE_NAME, "r") as refextract_references_reference_file:
+        refextract_references_reference = json.load(refextract_references_reference_file)
+    return refextract_references_reference
