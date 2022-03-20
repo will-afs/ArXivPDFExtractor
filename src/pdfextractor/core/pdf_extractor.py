@@ -25,7 +25,7 @@ def extract_pdf_task(pdf_metadata:dict) -> List:
     except:
         return 'Extraction failed for PDF with URN \"' + pdf_urn + '\"'
     json_object = json.dumps(pdf_dict, indent = 4)
-    with open("{}.json".format(pdf_urn), "w") as outfile:
+    with open("results/{}.json".format(pdf_urn), "w") as outfile:
         outfile.write(json_object)
     return 'Successfuly extracted PDF with URN \"' + pdf_urn + '\"'
 
