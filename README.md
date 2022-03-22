@@ -38,6 +38,29 @@ To use this solution as a whole, 3 services have to be launched first :
 All of which have to be reachable and available : their URL have to be specified into the [config.toml file](https://github.com/will-afs/ArXivPDFExtractor/blob/main/settings/config.toml)
 
 **Launching Redis**
+Installing redis
+
+    sudo apt update
+    sudo apt install redis-server
+    
+Edit redis configuration file by replacing "supervised no" by "supervised systemd" :
+
+    sudo nano /etc/redis/redis.conf
+    sudo systemctl restart redis.service
+    
+To avoid reloading Redis anytime the server is reloaded:
+
+    sudo systemctl disable redis
+
+Launch the service:
+
+    sudo systemctl enable redis-server
+
+Check the service is running:
+
+    sudo systemctl start redis.service
+
+(in a future version)
 
     sudo docker run --name redis-arxivpdfextractor -d redis
     
@@ -57,14 +80,27 @@ Refer to the PostgreSQL
 For more informations, including to make a custom installation, please refer directly to [the project README.md](https://github.com/will-afs/CooldownManager)
 
 **Launching the project applications**
+Clone the project on your machine:
 
-!! (no guarantee on the functionnality yet) !!
+    git clone https://github.com/will-afs/ArXivPDFExtractor/
 
-Launching ArXivParser
+Go into the cloned repository (stay at the root), and add the repository path to your Python environment variables:
+
+    export PYTHONPATH=$(pwd)
+
+Launch ArXivParser
+
+    python3 src/arxivparser/core/arxiv_parser.py
+   
+(in a future version)
 
     sudo docker run --name williamafonso/arxivparser
     
-Launching PDFExtractor
+(In a different terminal) launch PDFExtractor
+
+    celery -A src.pdfextractor.core.pdf_extractor worker --loglevel=INFO
+
+(in a future version)
 
     sudo docker run --name williamafonso/pdfextractor
 
