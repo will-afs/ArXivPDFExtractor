@@ -15,4 +15,4 @@ max_results = 1000
 
 ["PDFExtractor"]
 broker_url = "redis://localhost:6379/0"
-backend_url = "db+sqlite:///db.sqlite3"
+backend_url = "mongodb://localhost:27017/pdfdata" # "db+sqlite:///db.sqlite3"

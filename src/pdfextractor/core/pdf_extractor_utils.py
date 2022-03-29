@@ -1,14 +1,17 @@
 from src.cooldown_manager_utils import get_permission_to_request_arxiv
 
+from enum import Enum
 import re
 from refextract import extract_references_from_url
 import validators
 
 def extract_references_from_pdf_uri(pdf_uri:str, cooldown_manager_uri:str)->list:
-    """Return the references of a PDF
+    """Return the references of a PDF in a list. If none are found, return an empty list
 
     Parameters:
-    pdf_uri (str) : the PDF URI
+    pdf_uri (str) : the PDF URI. If not in a correct format, raise a ValueError
+    cooldown_manager_uri (str) : the CooldownManager URI to ask permission before
+    requesting arXiv.org services. If it refuses, raise a ConnectionRefusedError
 
     Returns:
     list: A list of the references found in the PDF
@@ -30,7 +33,12 @@ def extract_pdf(pdf_metadata:dict, cooldown_manager_uri:str) -> dict:
     """Extract the references of a PDF and aggregates them to the PDF metadata
 
     Parameters:
-    pdf_metadata (dict) : the PDF metadata 
+    pdf_metadata (dict) : the PDF metadata (as: {
+        'uri':str,
+        'authors':list<str>,
+        'title':str,
+        'references': list<dict>,
+    } with references: list<{'authors:list<str>}>)
     cooldown_manager_uri (str) : the URI through which ask permission to CooldownManager\
         to request ArXiv.org services
 
@@ -43,31 +51,79 @@ def extract_pdf(pdf_metadata:dict, cooldown_manager_uri:str) -> dict:
         'authors':pdf_metadata['authors'],
         'title':pdf_metadata['title'],
         'references': [],
+
     }
+
     # 2 - Extract references
     extracted_references = extract_references_from_pdf_uri(pdf_metadata['uri'], cooldown_manager_uri)
-    # 3 - Extract named entities from references
+    if len(extracted_references) == 0:
+        return pdf_dict
+
+    # 3 - Predict PDF References style
+    ref_style = predict_ref_style(extracted_references[0]['raw_ref'][0])
+    if ref_style == RefStyle.Unknown:
+        print('Unkown reference style for article with URN:\'{}\''.format(pdf_metadata['uri']))
+
+    # 4 - Extract named entities from references
     for reference_dict in extracted_references:
         reference = {
             'authors':None
         }
         try:
-            reference_dict['author']
+            # Check whether refextract found any author in ref, but don't use it
+            # Sometimes, refextract finds wrong authors in ref
+            reference_dict['author'] 
         except: # no author found
             pass
         else:
-            # extract each author from string
-            try:
-                reference['authors'] = extract_authors_from_apa_ref(reference_dict['raw_ref'][0])
-            except:
-                #TODO: rather use a logger.debug
-                print('\nCould not extract correctly authors '\
-                    'from the following raw_reference:\n{}\n'.format(reference_dict['raw_ref'][0]))
-            else:
+            # Extract authors from raw_ref
+            reference['authors'] = extract_authors_from_ref(reference_dict['raw_ref'][0], ref_style)
+            if reference['authors']:
                 pdf_dict['references'].append(reference)
-
+            else:
+                print('Could not extract author for ref:\'{}\''.format(reference_dict['raw_ref'][0]))
     return pdf_dict
 
+class RefStyle(Enum):
+    Unknown = 0
+    APA = 1
+
+def predict_ref_style(raw_ref)->RefStyle:
+    """Predict the style of a reference (e.g. \'APA\', \'IEEE\', etc.)
+
+    Parameters:
+    raw_ref (str) : the string from which predict the style
+
+    Returns:
+    RefStyle: the style of reference
+    """
+    # Check APA
+    pattern_author = re.compile(r"([a-z]|[A-Z])+\, [A-Z]\.")
+    pattern_date = re.compile(r"\.\ \([1-2][0-9][0-9][0-9][a-z]*\)\.")
+    if re.search(pattern_author, raw_ref, flags=0) \
+        and re.search(pattern_date, raw_ref, flags=0):
+        return RefStyle.APA
+    # Unknown reference style
+    return RefStyle.Unknown
+
+def extract_authors_from_ref(raw_ref, ref_style)->list:
+    """Extract the authors from a raw reference
+
+    Parameters:
+    raw_ref (str) : the string which might contain authors
+    ref_style (RefStyle) : the style of the reference
+
+    Returns:
+    list: the list of authors as string elements
+    """
+    try:
+        if ref_style == RefStyle.Unknown:
+            return []
+        elif ref_style == RefStyle.APA:
+            return extract_authors_from_apa_ref(raw_ref)
+    except:
+        return []
+    
 def extract_authors_from_apa_ref(apa_ref:str)->list:
     """Extract the authors from an APA reference
 
@@ -78,15 +134,10 @@ def extract_authors_from_apa_ref(apa_ref:str)->list:
     list: the list of authors as string elements
     """
     authors = []
-    # Searching pattern 'T. (1995)' or ' T. (1995b)' like
-    pattern = re.compile(r" [A-Z]\.\ \([1-2][0-9][0-9][0-9][a-z]*\)")
-    # 3 = len(' T.'), which should be included in authors_string
-    # try:
+    # Searching pattern '. (1995)' or '. (1995b)' like
+    pattern = re.compile(r"\.\ \([1-2][0-9][0-9][0-9][a-z]*\)") #  [A-Z]
+    # 1 = len('.'), which should be included in authors_string
     end_authors_section_idx = re.search(pattern, apa_ref, flags=0).start() + 1
-    # except AttributeError: # AttributeError: 'NoneType' object has no attribute 'start'
-    #     # Searching pattern 'L. (Eds.). (1977)' like
-    #     pattern = re.compile(r" [A-Z]\.\ \(Eds\.\) \([1-2][0-9][0-9][0-9][a-z]*\)")
-    #     end_authors_section_idx = re.search(pattern, apa_ref, flags=0).start() + 1
     authors_string = apa_ref[0:end_authors_section_idx]
     authors_string = authors_string.replace('& ', '')
     authors_string = authors_string.replace('.,', '..,')
