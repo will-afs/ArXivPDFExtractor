@@ -16,6 +16,7 @@ from src.pdfextractor.core.pdf_extractor_utils import (
     extract_authors_from_apa_ref,
     extract_references_from_pdf_uri,
     predict_ref_style,
+    extract_authors_from_ref,
     RefStyle                                         
 )
 
@@ -71,11 +72,25 @@ def test_extract_pdf(pdf_metadatas_reference, clean_references_reference, refext
     assert pdf_metadata['title'] == pdf_metadatas_reference[pdf_metadata_id]['title']
     assert pdf_metadata['references'] == []
     # Check when unkown reference style
-    mocker = mocker.patch('src.pdfextractor.core.pdf_extractor_utils.predict_ref_style', RefStyle.Unknown)
+    mocker.patch('src.pdfextractor.core.pdf_extractor_utils.predict_ref_style', RefStyle.Unknown)
     assert pdf_metadata['uri'] == pdf_metadatas_reference[pdf_metadata_id]['uri']
     assert pdf_metadata['authors'] == pdf_metadatas_reference[pdf_metadata_id]['authors']
     assert pdf_metadata['title'] == pdf_metadatas_reference[pdf_metadata_id]['title']
     assert pdf_metadata['references'] == []
+
+def test_extract_authors_from_ref(mocker):
+    # Checking with RefStyle.Unknown
+    authors_list = extract_authors_from_ref(APA_RAW_REF_VALUE, RefStyle.Unknown)
+    assert authors_list == []
+    # Checking with RefStyle.APA
+    dummy_authors = Mock()
+    extract_authors_from_apa_ref_mock = mocker.patch('src.pdfextractor.core.pdf_extractor_utils.extract_authors_from_apa_ref', return_value = dummy_authors)
+    authors_list = extract_authors_from_ref(APA_RAW_REF_VALUE, RefStyle.APA)
+    assert authors_list == dummy_authors
+    # Checking Exception
+    extract_authors_from_apa_ref_mock.side_effect=Exception('foo')
+    authors_list = extract_authors_from_ref(APA_RAW_REF_VALUE, RefStyle.APA)
+    assert authors_list == []
 
 def test_extract_authors_from_apa_ref(refextract_references_reference):
     # Pattern to match : ' P. (1990)'
