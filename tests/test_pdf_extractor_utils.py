@@ -49,6 +49,7 @@ def test_predict_ref_style():
     assert predict_ref_style(raw_ref) == RefStyle.Unknown
 
 def test_extract_pdf(pdf_metadatas_reference, clean_references_reference, refextract_references_reference, mocker):
+    # Check when success
     pdf_metadata_id = 11
     mocker.patch('src.pdfextractor.core.pdf_extractor_utils.extract_references_from_pdf_uri', return_value = refextract_references_reference)
     pdf_metadata = extract_pdf(pdf_metadatas_reference[pdf_metadata_id], COOLDOWN_MANAGER_URI)
@@ -61,6 +62,20 @@ def test_extract_pdf(pdf_metadatas_reference, clean_references_reference, refext
         'Selman, B.',
         'Levesque, H.'
     ]
+    # Check when no reference found
+    mocker.patch('src.pdfextractor.core.pdf_extractor_utils.extract_references_from_pdf_uri', return_value = [])
+    pdf_metadata_id = 0
+    pdf_metadata = extract_pdf(pdf_metadatas_reference[pdf_metadata_id], COOLDOWN_MANAGER_URI)
+    assert pdf_metadata['uri'] == pdf_metadatas_reference[pdf_metadata_id]['uri']
+    assert pdf_metadata['authors'] == pdf_metadatas_reference[pdf_metadata_id]['authors']
+    assert pdf_metadata['title'] == pdf_metadatas_reference[pdf_metadata_id]['title']
+    assert pdf_metadata['references'] == []
+    # Check when unkown reference style
+    mocker = mocker.patch('src.pdfextractor.core.pdf_extractor_utils.predict_ref_style', RefStyle.Unknown)
+    assert pdf_metadata['uri'] == pdf_metadatas_reference[pdf_metadata_id]['uri']
+    assert pdf_metadata['authors'] == pdf_metadatas_reference[pdf_metadata_id]['authors']
+    assert pdf_metadata['title'] == pdf_metadatas_reference[pdf_metadata_id]['title']
+    assert pdf_metadata['references'] == []
 
 def test_extract_authors_from_apa_ref(refextract_references_reference):
     # Pattern to match : ' P. (1990)'

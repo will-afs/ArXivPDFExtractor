@@ -63,7 +63,7 @@ def extract_pdf(pdf_metadata:dict, cooldown_manager_uri:str) -> dict:
     ref_style = predict_ref_style(extracted_references[0]['raw_ref'][0])
     if ref_style == RefStyle.Unknown:
         print('Unkown reference style for article with URN:\'{}\''.format(pdf_metadata['uri']))
-
+        return pdf_dict
     # 4 - Extract named entities from references
     for reference_dict in extracted_references:
         reference = {
