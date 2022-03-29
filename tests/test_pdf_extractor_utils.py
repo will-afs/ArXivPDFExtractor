@@ -7,12 +7,16 @@ from tests.conftest import (
                         PDF_CONTENT_REFERENCE_FILE_NAME,
                         PDF_METADATA_REFERENCE_FILE_NAME,
                         WRONG_PDF_URI,
-                        COOLDOWN_MANAGER_URI
+                        COOLDOWN_MANAGER_URI,
+                        APA_RAW_REF_VALUE,
+                        UNKNOWN_RAW_REF_VALUE
 )
 from src.pdfextractor.core.pdf_extractor_utils import (
     extract_pdf,
     extract_authors_from_apa_ref,
-    extract_references_from_pdf_uri                                           
+    extract_references_from_pdf_uri,
+    predict_ref_style,
+    RefStyle                                         
 )
 
 import pytest
@@ -36,6 +40,13 @@ def test_extract_references_from_pdf_uri(mocker):
     mock.side_effect=Exception('foo')
     assert extract_references_from_pdf_uri(PDF_URI, COOLDOWN_MANAGER_URI) == []
 
+def test_predict_ref_style():
+    # Style APA
+    raw_ref = APA_RAW_REF_VALUE
+    assert predict_ref_style(raw_ref) == RefStyle.APA
+    # Unknown style
+    raw_ref = UNKNOWN_RAW_REF_VALUE
+    assert predict_ref_style(raw_ref) == RefStyle.Unknown
 
 def test_extract_pdf(pdf_metadatas_reference, clean_references_reference, refextract_references_reference, mocker):
     pdf_metadata_id = 11
