@@ -16,7 +16,7 @@ The project configuration holds in the [config.toml file](https://github.com/wil
 To use this solution as a whole, 3 services have to be launched first :
 - [<img src="https://github.com/will-afs/AdvancedAcademicProject/blob/main/doc/CooldownManager.png" width="30"> Cooldown Manager](https://github.com/will-afs/CooldownManager), to avoid overloading the ArXiv Open API
 - [<img src="https://github.com/will-afs/PDFExtractor/blob/main/doc/img/pickaxe.png" width="30">  PDF Extractor](https://github.com/will-afs/PDFExtractor), to extract data from PDFs remotely, in AWS Lambda functions
-- [<img src="" width="30">  Redis Task Queue](), to store the result of ArXiv PDFs extraction (JSON) as a task, in a task queue
+- [<img src="https://github.com/will-afs/AdvancedAcademicProject/blob/main/doc/Redis.png" width="30">  Redis Task Queue](), to store the result of ArXiv PDFs extraction (JSON) as a task, in a task queue
 
 All of which have to be reachable and available : their URL have to be specified into the [config.toml file](https://github.com/will-afs/ArXivPDFExtractor/blob/main/settings/config.toml)
 
