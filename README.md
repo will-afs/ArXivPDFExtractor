@@ -1,20 +1,9 @@
 # <img src="https://github.com/will-afs/AdvancedAcademicProject/blob/main/doc/ArXivParser.png" width="30"> <img src="https://github.com/will-afs/AdvancedAcademicProject/blob/main/doc/PDFExtractor.png" width="30"> ArXivPDFExtractor
-Populate a database with data extracted from scientific articles (PDFs) available on ArXiv.org
+Process scientific articles (PDFs) available on ArXiv.org
 
-This is a sub-project of the [AdvancedAcademicProject](https://github.com/will-afs/AdvancedAcademicProject/)
+<img src="https://github.com/will-afs/AdvancedAcademicProject/blob/main/doc/ArXivPDFExtractor%20architecture.JPG" width="700">
 
-It contains two programs :
-
-- [<img src="https://github.com/will-afs/AdvancedAcademicProject/blob/main/doc/ArXivParser.png" width="30"> ArXivParser](https://github.com/will-afs/ArXivPDFExtractor/src/ArXivParser) (involved in step 1)
-- [<img src="https://github.com/will-afs/AdvancedAcademicProject/blob/main/doc/PDFExtractor.png" width="30"> PDFExtractor](https://github.com/will-afs/ArXivPDFExtractor/src/PDFExtractor) (involved in step 2)
-
-🤖 **Step 1**
-
-<img src="https://github.com/will-afs/AdvancedAcademicProject/blob/main/doc/Step%201.JPG" width="700">
-
-⛏️ **Step 2**
-
-<img src="https://github.com/will-afs/AdvancedAcademicProject/blob/main/doc/Step%202.JPG" width="700">
+This is a sub-project of the [AdvancedAcademicProject](https://github.com/will-afs/AdvancedAcademicProject/]
 
 ⚙️ Configuration
 -----------------
@@ -25,9 +14,9 @@ The project configuration holds in the [config.toml file](https://github.com/wil
 *Note : It is possible to run all of the services mentionned below on different machines*
 
 To use this solution as a whole, 3 services have to be launched first :
-- A **Message Broker**, to exchange informations between the ArXivParser CRON bot and the PDFExtractor workers 👉 For example : Redis    
-- A **Cooldown Manager**, to avoid overloading the ArXiv Open API
-- A **PDF Extractor**, to extract data from PDFs remotely, in AWS Lambda functions
+- [<img src="https://github.com/will-afs/AdvancedAcademicProject/blob/main/doc/CooldownManager.png" width="30"> Cooldown Manager](https://github.com/will-afs/CooldownManager), to avoid overloading the ArXiv Open API
+- [<img src="https://github.com/will-afs/PDFExtractor/blob/main/doc/img/pickaxe.png" width="30">  PDF Extractor](https://github.com/will-afs/PDFExtractor), to extract data from PDFs remotely, in AWS Lambda functions
+- [<img src="" width="30">  Redis Task Queue](), to store the result of ArXiv PDFs extraction (JSON) as a task, in a task queue
 
 All of which have to be reachable and available : their URL have to be specified into the [config.toml file](https://github.com/will-afs/ArXivPDFExtractor/blob/main/settings/config.toml)
 
@@ -41,11 +30,12 @@ For more informations, including how to make a custom installation, please refer
 
 Please refer to the procedure explained in [the meta project README.md](https://github.com/will-afs/AdvancedAcademicProject/)
 
-** Launching PDFExtractor**
+**Launching PDFExtractor**
 
 Please refer to the procedure explained in [the project README.md](https://github.com/will-afs/PDFExtractor/)
 
 **Launching the project applications**
+
 Clone the project on your machine:
 
     git clone https://github.com/will-afs/ArXivPDFExtractor/
