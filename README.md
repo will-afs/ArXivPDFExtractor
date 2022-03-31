@@ -75,7 +75,7 @@ Refer to the PostgreSQL
 
 **Launching CooldownManager**
 
-    sudo docker run --name cooldownmanager -d williamafonso/cooldownmanager
+    sudo docker run --name cooldownmanager -d -p 80:80 williamafonso/cooldownmanager
 
 For more informations, including to make a custom installation, please refer directly to [the project README.md](https://github.com/will-afs/CooldownManager)
 
