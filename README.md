@@ -1,63 +1,75 @@
-# <img src="https://github.com/will-afs/AdvancedAcademicProject/blob/main/doc/ArXivParser.png" width="30"> <img src="https://github.com/will-afs/AdvancedAcademicProject/blob/main/doc/PDFExtractor.png" width="30"> ArXivPDFExtractor
+# <img src="https://github.com/will-afs/AdvancedAcademicProject/blob/main/doc/Icons/ArXivParser.png" width="30"> ArXivParser
 Process scientific articles (PDFs) available on ArXiv.org
 
-<img src="https://github.com/will-afs/AdvancedAcademicProject/blob/main/doc/ArXivPDFExtractor%20architecture.JPG" width="700">
+<img src="https://github.com/will-afs/AdvancedAcademicProject/blob/main/doc/Deployment%20architecture/ArXivPDFExtractor/ArXivPDFExtractor%20architecture.JPG" width="700">
 
-This is a sub-project of the [AdvancedAcademicProject](https://github.com/will-afs/AdvancedAcademicProject/]
+This is a sub-project of the [AdvancedAcademicProject](https://github.com/will-afs/AdvancedAcademicProject/)
 
 ⚙️ Configuration
 -----------------
-The project configuration holds in the [config.toml file](https://github.com/will-afs/ArXivPDFExtractor/blob/main/settings/config.toml).
+
+The project configuration holds in the [config.toml file](https://github.com/will-afs/ArXivPDFExtractor/blob/main/settings/config.toml)
 
 🔽 Installation and usage in production
 ----------------------------------------
 *Note : It is possible to run all of the services mentionned below on different machines*
 
 To use this solution as a whole, 3 services have to be launched first :
-- [<img src="https://github.com/will-afs/AdvancedAcademicProject/blob/main/doc/CooldownManager.png" width="30"> Cooldown Manager](https://github.com/will-afs/CooldownManager), to avoid overloading the ArXiv Open API
-- [<img src="https://github.com/will-afs/PDFExtractor/blob/main/doc/img/pickaxe.png" width="30">  PDF Extractor](https://github.com/will-afs/PDFExtractor), to extract data from PDFs remotely, in AWS Lambda functions
-- [<img src="https://github.com/will-afs/AdvancedAcademicProject/blob/main/doc/Redis.png" width="30">  Redis Task Queue](), to store the result of ArXiv PDFs extraction (JSON) as a task, in a task queue
+- [<img src="https://github.com/will-afs/AdvancedAcademicProject/blob/main/doc/Icons/CooldownManager.png" width="30"> Cooldown Manager](https://github.com/will-afs/CooldownManager), to avoid overloading the ArXiv Open API
+- [<img src="https://github.com/will-afs/AdvancedAcademicProject/blob/main/doc/Icons/PDFExtractor.png" width="30">  PDF Extractor](https://github.com/will-afs/PDFExtractor), to extract data from PDFs remotely, in AWS Lambda functions
+- [<img src="https://github.com/will-afs/AdvancedAcademicProject/blob/main/doc/Icons/Redis.png" width="30">  Redis](), to store the result of ArXiv PDFs extraction (JSON) as a task, in a task queue
 
-All of which have to be reachable and available : their URL have to be specified into the [config.toml file](https://github.com/will-afs/ArXivPDFExtractor/blob/main/settings/config.toml)
+All of which have to be reachable and available : the services must be running and accessible from ArXivParser. For that, their URL have to be specified into the [config.toml file](https://github.com/will-afs/ArXivPDFExtractor/blob/main/settings/config.toml)
 
-**Launching CooldownManager**
+**Launching ArXivParser**
 
-    sudo docker run --name cooldownmanager -d -p 80:80 williamafonso/cooldownmanager
-
-For more informations, including how to make a custom installation, please refer directly to [the project README.md](https://github.com/will-afs/CooldownManager)
-
-**Launching Redis**
-
-Please refer to the procedure explained in [the meta project README.md](https://github.com/will-afs/AdvancedAcademicProject/)
-
-**Launching PDFExtractor**
-
-Please refer to the procedure explained in [the project README.md](https://github.com/will-afs/PDFExtractor/)
-
-**Launching the project applications**
-
+    sudo docker run --name williamafonso/arxivparser
+    
+🧪 Developing and running tests
+--------------------------------
 Clone the project on your machine:
 
     git clone https://github.com/will-afs/ArXivPDFExtractor/
 
-Go into the cloned repository (stay at the root), and add the repository path to your Python environment variables:
+Go into the cloned repository (stay at the root) - it will be the working directory:
+
+    cd ArXivPDFExtractor
+
+Add the working directory to the Python PATH environment variable:
 
     export PYTHONPATH=$(pwd)
+    
+Create a virtual environment:
 
-Launch ArXivParser
+    python3 -m venv .venv
 
-    python3 src/arxivparser/core/arxiv_parser.py
-   
-(in a future version)
-
-    sudo docker run --name williamafonso/arxivparser
-
-For more informations, including custom installation and launch, please refer directly to their respective README.md files :
-- [ArXivParser README.md](https://github.com/will-afs/ArXivPDFExtractor/blob/main/src/arxivparser/README.md)
-- [PDFExtractor README.md](https://github.com/will-afs/ArXivPDFExtractor/blob/main/src/pdfextractor/README.md)
-
-🧪 Running tests
------------------
-The tests are placed in the tests folder. They can be ran from the root folder with the pytest command, as follows :
+Activate the virtual environment:
+    
+    source .venv/bin/activate
+    
+Install the dependencies:
+    
+    pip install -r requirements.txt
+    
+The unit tests are placed in the tests folder. They can be ran from the root folder with the pytest command, as follows :
 
     python -m pytest tests
+
+🐋 Containerizing the application 
+----------------------------------
+To build a Docker image:
+
+    sudo docker build --tag arxivparser .
+
+Or if you want to be able to push it later to your DockerHub:
+
+    sudo docker build --tag <your_docker_username>/arxivparser .
+
+Pushing the Docker image to your registry:
+
+    sudo docker push <your_docker_user_name>/arxivparser
+
+Running a Docker image:
+
+    sudo docker run --name arxivparser
+    
