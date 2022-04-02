@@ -73,3 +73,19 @@ Running a Docker image:
 
     sudo docker run --name arxivparser
     
+
+☁️ Deploying on EC2
+--------------------
+Create an AWS EC2 instance (ideally Ubuntu Server 20.04 LTS) - keep your KeyPair.pem file safe !
+
+Configure Security Group so that the machine is reachable via SSH and HTTP
+    
+By default, permissions on the keypair.pem file are too open and must be restricted:
+
+    chmod 600 <path_to_your_key_pair>
+
+You should now be able to connect to your EC2 instance:
+
+    sudo ssh -i <path_to_your_key_pair> ubuntu@<ec2_instance_public_ipv4>
+
+Once connected, deploy and run the service as a container, as specified above
