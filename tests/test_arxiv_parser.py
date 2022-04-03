@@ -1,5 +1,6 @@
+from copy import deepcopy
+import json
 import pytest
-
 import time
 import threading
 
@@ -8,7 +9,8 @@ from tests.conftest import (
                         ARXIV_URL,
                         CAT,
                         MAX_RESULTS,
-                        COOLDOWN_MANAGER_URI
+                        COOLDOWN_MANAGER_URI,
+                        PDF_EXTRACTOR_URI
 )
 
 def test_constructor_success(arxiv_parser):
@@ -17,6 +19,7 @@ def test_constructor_success(arxiv_parser):
     assert arxiv_parser._cat == CAT
     assert arxiv_parser._max_results == MAX_RESULTS
     assert arxiv_parser._cooldown_manager_uri == COOLDOWN_MANAGER_URI
+    assert arxiv_parser._pdf_extractor_uri == PDF_EXTRACTOR_URI
     assert arxiv_parser._time_step == TIME_STEP
     assert arxiv_parser._run_thread == None
     assert arxiv_parser._stopping == None
@@ -25,12 +28,12 @@ def test_constructor_success(arxiv_parser):
 
 def test__fetch_atom_feed_from_arxiv_api(arxiv_parser, feed, mocker):
     # Success
-    mocker.patch('src.arxivparser.core.arxiv_parser.get_permission_to_request_arxiv', return_value = True)
-    mocker.patch('src.arxivparser.core.arxiv_parser.urllib.request.urlopen', return_value = feed)
+    mocker.patch('src.core.arxiv_parser.get_permission_to_request_arxiv', return_value = True)
+    mocker.patch('src.core.arxiv_parser.request.urlopen', return_value = feed)
     assert arxiv_parser._fetch_atom_feed_from_arxiv_api() == feed
 
     # Failure : no permission from Cooldown Manager
-    mocker.patch('src.arxivparser.core.arxiv_parser.get_permission_to_request_arxiv', return_value = False)
+    mocker.patch('src.core.arxiv_parser.get_permission_to_request_arxiv', return_value = False)
     with pytest.raises(ConnectionRefusedError):
         arxiv_parser._fetch_atom_feed_from_arxiv_api()
 
@@ -43,25 +46,60 @@ def test__extract_pdf_metadatas_from_atom_feed(arxiv_parser, feed, pdf_metadatas
     pdf_metadatas = arxiv_parser._extract_pdf_metadatas_from_atom_feed(b'svdfvdfv')
     assert pdf_metadatas == []
 
-def test_fetch_new_pdf_metadatas(arxiv_parser, feed, mocker):
+def test__fetch_new_pdf_data(arxiv_parser, feed, pdf_metadatas_reference, mocker):
     # Success
-    mocker.patch('src.arxivparser.core.arxiv_parser.ArXivParser._fetch_atom_feed_from_arxiv_api', return_value = feed)
-    mocked_push_to_task_queue = mocker.patch('src.arxivparser.core.arxiv_parser.ArXivParser._push_to_task_queue')
-    fetch_thread = threading.Thread(target=arxiv_parser.fetch_new_pdf_metadatas, args=())
-    fetch_thread.start()
-    while not mocked_push_to_task_queue.call_count >= 1:
-        time.sleep(0.1)
-    mocker.patch('src.arxivparser.core.arxiv_parser.ArXivParser._fetch_atom_feed_from_arxiv_api', return_value = b'svdfvdfv')
-    assert mocked_push_to_task_queue.call_count >= 1
-    fetch_thread.join(0.5) # Let some time to the join to terminate
-    assert not fetch_thread.is_alive()
+    mocker.patch(
+        'src.core.arxiv_parser.ArXivParser._fetch_atom_feed_from_arxiv_api',
+        side_effect = [feed, None]
+        )
+    expected_feed_extraction_results = [pdf_metadatas_reference[0], pdf_metadatas_reference[1]]
+    mocker.patch(
+        'src.core.arxiv_parser.ArXivParser._extract_pdf_metadatas_from_atom_feed',
+        side_effect = [expected_feed_extraction_results, None]
+        )
+    expected_extraction_results = deepcopy(expected_feed_extraction_results)
+    for i in range(len(expected_extraction_results)):
+        expected_extraction_results[i]['references'] = []
+    mocker.patch(
+        'src.core.arxiv_parser.ArXivParser._request_extraction',
+        side_effect = expected_extraction_results
+        )
+    mocked_push_to_task_queue = mocker.patch(
+        'src.core.arxiv_parser.ArXivParser._push_to_task_queue',
+        )
+    arxiv_parser._fetch_new_pdf_data()
+    mocked_push_to_task_queue.assert_called_once_with(expected_extraction_results)    
+
+def test__request_extraction(
+    arxiv_parser,
+    pdf_metadatas_reference,
+    pdf_extractor_full_response_reference,
+    mocker
+    ):
+    # Success
+    post_mocker = mocker.patch(
+        'src.core.arxiv_parser.requests.post',
+        return_value = pdf_extractor_full_response_reference
+    )
+    pdf_data = arxiv_parser._request_extraction(pdf_metadatas_reference[0])
+    post_mocker.assert_called_once_with(
+        arxiv_parser._pdf_extractor_uri,
+        data = json.dumps(pdf_metadatas_reference[0]),
+        headers={'Content-Type':'application/json'}
+    )
+    expected_response = deepcopy(pdf_metadatas_reference[0])
+    expected_response['references'] = []
+    assert pdf_data == expected_response
     
+
+def test__push_to_task_queue():
+    assert True
 
 def test__run(arxiv_parser, mocker):
     def side_effect():
         time.sleep(0.1)
     fetch_mocker = mocker.patch(
-                                    'src.arxivparser.core.arxiv_parser.ArXivParser.fetch_new_pdf_metadatas',
+                                    'src.core.arxiv_parser.ArXivParser._fetch_new_pdf_data',
                                     side_effect = side_effect
                                 )
     arxiv_parser._time_step = 0
@@ -75,7 +113,7 @@ def test__run(arxiv_parser, mocker):
 
 
 def test_start_stop_cron(arxiv_parser, mocker):
-    mocker.patch('src.arxivparser.core.arxiv_parser.ArXivParser.fetch_new_pdf_metadatas')
+    mocker.patch('src.core.arxiv_parser.ArXivParser._fetch_new_pdf_data')
     arxiv_parser._time_step = 0.1
     arxiv_parser.start_cron()
     assert arxiv_parser._run_thread.is_alive()

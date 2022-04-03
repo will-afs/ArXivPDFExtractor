@@ -1,10 +1,11 @@
 """"This file contains setup functions called fixtures that each test will use"""
-from src.arxivparser.core.arxiv_parser import (
+from src.core.arxiv_parser import (
     ArXivParser,
 )
 
 import configparser
 import json
+import pickle
 import pytest
 
 
@@ -29,6 +30,7 @@ FEED_DATA_REFERENCE_FILE_NAME = config["REFERENCES"]["FEED_DATA_REFERENCE_FILE_N
 PDF_METADATAS_REFERENCE_FILE_NAME = config["REFERENCES"]["PDF_METADATAS_REFERENCE_FILE_NAME"]
 CLEAN_REFERENCES_REFERENCE_FILE_NAME = config["REFERENCES"]["CLEAN_REFERENCES_REFERENCE_FILE_NAME"]
 REFEXTRACT_REFERENCES_REFERENCE_FILE_NAME = config["REFERENCES"]["REFEXTRACT_REFERENCES_REFERENCE_FILE_NAME"]
+PDF_EXTRACTOR_FULL_RESP_REF_FILE_NAME = config["REFERENCES"]["PDF_EXTRACTOR_FULL_RESP_REF_FILE_NAME"]
 APA_RAW_REF_VALUE = config["REFERENCES"]["APA_RAW_REF_VALUE"]
 UNKNOWN_RAW_REF_VALUE = config["REFERENCES"]["UNKNOWN_RAW_REF_VALUE"]
 
@@ -41,10 +43,19 @@ MAX_RESULTS = int(config["ArXivParser"]["max_results"])
 # [Cooldown Manager]
 COOLDOWN_MANAGER_URI = config['Cooldown Manager']['cooldown_manager_uri']
 
+# [PDF Extractor]
+PDF_EXTRACTOR_URI = config["PDF Extractor"]["pdf_extractor_uri"]
 
 @pytest.fixture
 def arxiv_parser():
-    return ArXivParser(ARXIV_URL, CAT, MAX_RESULTS, COOLDOWN_MANAGER_URI, TIME_STEP)
+    return ArXivParser(
+        ARXIV_URL,
+        CAT,
+        MAX_RESULTS,
+        COOLDOWN_MANAGER_URI,
+        PDF_EXTRACTOR_URI,
+        TIME_STEP
+        )
 
 @pytest.fixture
 def feed():
@@ -69,3 +80,9 @@ def refextract_references_reference():
     with open(DATA_FILE_PATH + REFEXTRACT_REFERENCES_REFERENCE_FILE_NAME, "r") as refextract_references_reference_file:
         refextract_references_reference = json.load(refextract_references_reference_file)
     return refextract_references_reference
+
+@pytest.fixture
+def pdf_extractor_full_response_reference():
+    with open(DATA_FILE_PATH + PDF_EXTRACTOR_FULL_RESP_REF_FILE_NAME, 'rb') as pdf_extractor_full_resp_ref_file:
+        pdf_extractor_full_resp_ref = pickle.load(pdf_extractor_full_resp_ref_file)
+    return pdf_extractor_full_resp_ref

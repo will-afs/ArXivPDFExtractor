@@ -1,4 +1,4 @@
-from src.arxivparser.core.arxiv_parser import (
+from src.core.arxiv_parser import (
     ArXivParser,
 )
 
@@ -20,6 +20,25 @@ NOT_FOUND_PDF_URI = config["PDF URIs"]["NOT_FOUND_PDF_URI"]
 NOT_PDF_URI = config["PDF URIs"]["NOT_PDF_URI"]
 WRONG_PDF_URI = config["PDF URIs"]["WRONG_PDF_URI"]
 
+# [REFERENCES]
+PDF_DATA_REFERENCE_FILE_NAME = config["REFERENCES"]["PDF_DATA_REFERENCE_FILE_NAME"]
+PDF_CONTENT_REFERENCE_FILE_NAME = config["REFERENCES"]["PDF_CONTENT_REFERENCE_FILE_NAME"]
+PDF_METADATA_REFERENCE_FILE_NAME = config["REFERENCES"]["PDF_METADATA_REFERENCE_FILE_NAME"]
+FEED_DATA_REFERENCE_FILE_NAME = config["REFERENCES"]["FEED_DATA_REFERENCE_FILE_NAME"]
+PDF_METADATAS_REFERENCE_FILE_NAME = config["REFERENCES"]["PDF_METADATAS_REFERENCE_FILE_NAME"]
+CLEAN_REFERENCES_REFERENCE_FILE_NAME = config["REFERENCES"]["CLEAN_REFERENCES_REFERENCE_FILE_NAME"]
+REFEXTRACT_REFERENCES_REFERENCE_FILE_NAME = config["REFERENCES"]["REFEXTRACT_REFERENCES_REFERENCE_FILE_NAME"]
+APA_RAW_REF_VALUE = config["REFERENCES"]["APA_RAW_REF_VALUE"]
+UNKNOWN_RAW_REF_VALUE = config["REFERENCES"]["UNKNOWN_RAW_REF_VALUE"]
+
+# [ArXivParser]
+TIME_STEP = int(config["ArXivParser"]["time_step"])
+ARXIV_URL = config["ArXivParser"]["arxiv_url"]
+CAT = config["ArXivParser"]["cat"]
+MAX_RESULTS = int(config["ArXivParser"]["max_results"])
+
+# [Cooldown Manager]
+COOLDOWN_MANAGER_URI = config['Cooldown Manager']['cooldown_manager_uri']
 
 @pytest.fixture
 def pdf_bytes():
