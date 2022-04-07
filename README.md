@@ -1,7 +1,7 @@
 # <img src="https://github.com/will-afs/AdvancedAcademicProject/blob/main/doc/Icons/ArXivParser.png" width="30"> ArXivParser
 Process scientific articles (PDFs) available on ArXiv.org
 
-<img src="https://github.com/will-afs/AdvancedAcademicProject/blob/main/doc/Deployment%20architecture/ArXivPDFExtractor/ArXivPDFExtractor%20architecture.JPG" width="700">
+<img src="https://github.com/will-afs/AdvancedAcademicProject/blob/main/doc/Deployment%20architecture/ArXivPDFExtractor/ArXivPDFExtractor%20architecture.png" width="700">
 
 This is a sub-project of the [AdvancedAcademicProject](https://github.com/will-afs/AdvancedAcademicProject/)
 
@@ -14,8 +14,7 @@ The project configuration holds in the [config.toml file](https://github.com/wil
 ----------------------------------------
 *Note : It is possible to run all of the services mentionned below on different machines*
 
-To use this solution as a whole, 3 services have to be launched first :
-- [<img src="https://github.com/will-afs/AdvancedAcademicProject/blob/main/doc/Icons/CooldownManager.png" width="30"> Cooldown Manager](https://github.com/will-afs/CooldownManager), to avoid overloading the ArXiv Open API
+To use this solution as a whole, some services have to be launched first :
 - [<img src="https://github.com/will-afs/AdvancedAcademicProject/blob/main/doc/Icons/PDFExtractor.png" width="30">  PDF Extractor](https://github.com/will-afs/PDFExtractor), to extract data from PDFs remotely, in AWS Lambda functions
 - [<img src="https://github.com/will-afs/AdvancedAcademicProject/blob/main/doc/Icons/Redis.png" width="30">  Redis](), to store the result of ArXiv PDFs extraction (JSON) as a task, in a task queue
 
@@ -78,7 +77,7 @@ Running a Docker image:
 --------------------
 Create an AWS EC2 instance (ideally Ubuntu Server 20.04 LTS) - keep your KeyPair.pem file safe !
 
-Configure Security Group so that the machine is reachable via SSH and HTTP
+Configure a VPC and a Security Group so that the machine is reachable via SSH and HTTP
     
 By default, permissions on the keypair.pem file are too open and must be restricted:
 
