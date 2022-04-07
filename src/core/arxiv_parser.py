@@ -1,7 +1,4 @@
-from src.cooldown_manager_utils import get_permission_to_request_arxiv
-
-from urllib import request, parse
-
+from urllib import request
 import requests
 import json
 
@@ -35,9 +32,6 @@ class ArXivParser():
     max_results : int
         the number of max results that can be retrieved 
         per request to ArXiv.org
-    cooldown_manager_uri : str
-        the uri from which Cooldown Manager can be reached 
-        to get permission to request ArXiv
     pdf_extractor_uri : str
         the uri from which PDFExtractor Lambda service can be reached 
     time_step : int
@@ -55,7 +49,6 @@ class ArXivParser():
                     arxiv_url:str='https://export.arxiv.org/api/',
                     cat:str='cs.ai',
                     max_results:int=1000,
-                    cooldown_manager_uri:str='http://172.17.0.2:5000/',
                     pdf_extractor_uri:str='https://lbninhtxlc.execute-api.eu-west-3.amazonaws.com/beta/test-function',
                     time_step:int=604800
                 ):
@@ -64,12 +57,10 @@ class ArXivParser():
                                         arxiv_url,
                                         cat,
                                         max_results,
-                                        cooldown_manager_uri,
                                         pdf_extractor_uri,
                                         time_step
                                         )
         self._arxiv_url = arxiv_url
-        self._cooldown_manager_uri = cooldown_manager_uri
         self._pdf_extractor_uri = pdf_extractor_uri
         self._cat = cat
         self._max_results = int(max_results)
@@ -83,15 +74,11 @@ class ArXivParser():
                                         arxiv_url,
                                         cat,
                                         max_results,
-                                        cooldown_manager_uri:str='http://172.17.0.2:5000/',
                                         pdf_extractor_uri:str='https://lbninhtxlc.execute-api.eu-west-3.amazonaws.com/beta/test-function',
                                         time_step:int=604800
                                     ):
         if (not type(arxiv_url) == str or not validators.url(arxiv_url)):
             raise ValueError("Wrong value for 'arxiv_url' argument. Expected an url-like string. Example 'http://www.google.com'")
-
-        if (not type(cooldown_manager_uri) == str or not validators.url(cooldown_manager_uri)):
-            raise ValueError("Wrong value for 'cooldown_manager_uri' argument. Expected an url-like string. Example 'http://172.17.0.2:5000/'")
 
         possible_cat_values = ['cs.ai',]
         if (not type(cat) == str or not cat in possible_cat_values):
@@ -175,11 +162,8 @@ class ArXivParser():
             self._cat, start, self._max_results
         )
         uri = self._arxiv_url + query
-        if get_permission_to_request_arxiv(self._cooldown_manager_uri):
-            bytes_feed = request.urlopen(uri)
-            return bytes_feed
-        else:
-            raise ConnectionRefusedError('CooldownManager refused permission to connect to ArXiv.org')
+        bytes_feed = request.urlopen(uri)
+        return bytes_feed
 
     def _extract_pdf_metadatas_from_atom_feed(self, feed: bytes) -> list:
         """Extract PDF URIs and authors from an Atom feed
@@ -259,9 +243,6 @@ class ArXivParser():
                 ]
             }
         """
-        # data = parse.urlencode(pdf_metadata).encode()
-        # req =  request.Request(self._pdf_extractor_uri, data=data, method="POST") # this will make the method "POST"
-        # resp = request.urlopen(req)
         url = self._pdf_extractor_uri
         headers = {'Content-Type':'application/json'}
         data = pdf_metadata
@@ -270,7 +251,7 @@ class ArXivParser():
         print('Received answer:\n{}\n'.format(full_response))
         pdf_extractor_response = full_response.json()
         if pdf_extractor_response['statusCode'] != 200:
-            raise ResourceWarning(
+            print(
                 'Something went wrong when requesting PDFExtractor API:\n\
                     {}'.format(json.dumps(pdf_extractor_response))
                 )
@@ -289,9 +270,8 @@ if __name__ == '__main__':
     arxiv_url = config['ArXivParser']['arxiv_url']
     cat = config['ArXivParser']['cat']
     max_results = config['ArXivParser']['max_results']
-    cooldown_manager_uri = config['Cooldown Manager']['cooldown_manager_uri']
     pdf_extractor_uri = config['PDFExtractor']['pdf_extractor_uri']
     time_step = config['ArXivParser']['time_step']
 
-    arxiv_parser = ArXivParser(arxiv_url, cat, max_results, cooldown_manager_uri, pdf_extractor_uri, time_step)
+    arxiv_parser = ArXivParser(arxiv_url, cat, max_results, pdf_extractor_uri, time_step)
     arxiv_parser.start_cron()

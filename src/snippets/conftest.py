@@ -37,9 +37,6 @@ ARXIV_URL = config["ArXivParser"]["arxiv_url"]
 CAT = config["ArXivParser"]["cat"]
 MAX_RESULTS = int(config["ArXivParser"]["max_results"])
 
-# [Cooldown Manager]
-COOLDOWN_MANAGER_URI = config['Cooldown Manager']['cooldown_manager_uri']
-
 @pytest.fixture
 def pdf_bytes():
     with open(DATA_FILE_PATH + PDF_DATA_REFERENCE_FILE_NAME, "rb") as pdf_file:

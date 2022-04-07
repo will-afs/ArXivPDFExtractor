@@ -9,7 +9,6 @@ from tests.conftest import (
                         ARXIV_URL,
                         CAT,
                         MAX_RESULTS,
-                        COOLDOWN_MANAGER_URI,
                         PDF_EXTRACTOR_URI
 )
 
@@ -18,7 +17,6 @@ def test_constructor_success(arxiv_parser):
     assert arxiv_parser._arxiv_url == ARXIV_URL
     assert arxiv_parser._cat == CAT
     assert arxiv_parser._max_results == MAX_RESULTS
-    assert arxiv_parser._cooldown_manager_uri == COOLDOWN_MANAGER_URI
     assert arxiv_parser._pdf_extractor_uri == PDF_EXTRACTOR_URI
     assert arxiv_parser._time_step == TIME_STEP
     assert arxiv_parser._run_thread == None
@@ -28,14 +26,8 @@ def test_constructor_success(arxiv_parser):
 
 def test__fetch_atom_feed_from_arxiv_api(arxiv_parser, feed, mocker):
     # Success
-    mocker.patch('src.core.arxiv_parser.get_permission_to_request_arxiv', return_value = True)
     mocker.patch('src.core.arxiv_parser.request.urlopen', return_value = feed)
     assert arxiv_parser._fetch_atom_feed_from_arxiv_api() == feed
-
-    # Failure : no permission from Cooldown Manager
-    mocker.patch('src.core.arxiv_parser.get_permission_to_request_arxiv', return_value = False)
-    with pytest.raises(ConnectionRefusedError):
-        arxiv_parser._fetch_atom_feed_from_arxiv_api()
 
 def test__extract_pdf_metadatas_from_atom_feed(arxiv_parser, feed, pdf_metadatas_reference):
     # Success

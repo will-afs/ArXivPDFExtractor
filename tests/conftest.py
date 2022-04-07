@@ -40,9 +40,6 @@ ARXIV_URL = config["ArXivParser"]["arxiv_url"]
 CAT = config["ArXivParser"]["cat"]
 MAX_RESULTS = int(config["ArXivParser"]["max_results"])
 
-# [Cooldown Manager]
-COOLDOWN_MANAGER_URI = config['Cooldown Manager']['cooldown_manager_uri']
-
 # [PDF Extractor]
 PDF_EXTRACTOR_URI = config["PDF Extractor"]["pdf_extractor_uri"]
 
@@ -52,7 +49,6 @@ def arxiv_parser():
         ARXIV_URL,
         CAT,
         MAX_RESULTS,
-        COOLDOWN_MANAGER_URI,
         PDF_EXTRACTOR_URI,
         TIME_STEP
         )

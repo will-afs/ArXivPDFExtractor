@@ -10,9 +10,6 @@ max_results = 10
   id = 1
   value = 'cs.ai'
 
-["Cooldown Manager"]
-cooldown_manager_uri = "http://15.188.144.230:80/"
-
 ["PDFExtractor"]
 pdf_extractor_uri = "https://lbninhtxlc.execute-api.eu-west-3.amazonaws.com/beta/test-function"
 
