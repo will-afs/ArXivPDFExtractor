@@ -1,7 +1,7 @@
 # <img src="https://github.com/will-afs/AdvancedAcademicProject/blob/main/doc/Icons/ArXivParser.png" width="30"> ArXivParser
 Process scientific articles (PDFs) available on ArXiv.org
 
-<img src="https://github.com/will-afs/AdvancedAcademicProject/blob/main/doc/Deployment%20architecture/ArXivPDFExtractor/ArXivPDFExtractor%20architecture.JPG" width="700">
+<img src="https://github.com/will-afs/AdvancedAcademicProject/blob/main/doc/Deployment%20architecture/ArXivPDFExtractor/ArXivPDFExtractor%20architecture.png" width="700">
 
 This is a sub-project of the [AdvancedAcademicProject](https://github.com/will-afs/AdvancedAcademicProject/)
 
