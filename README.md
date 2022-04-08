@@ -20,9 +20,13 @@ To use this solution as a whole, some services have to be launched first :
 
 All of which have to be reachable and available : the services must be running and accessible from ArXivParser. For that, their URL have to be specified into the [config.toml file](https://github.com/will-afs/ArXivPDFExtractor/blob/main/settings/config.toml)
 
+*Note: for now, the redis task queue does not need to be instanciated. Instead, the resulting macrostructure.json file is stored in the results folder.*
+    
 **Launching ArXivParser**
 
-    sudo docker run --name williamafonso/arxivparser
+Follow the "Developing and running tests" section above, and then, run:
+
+    python src.core.arxiv_parser.py
     
 🧪 Developing and running tests
 --------------------------------
@@ -52,26 +56,7 @@ Install the dependencies:
     
 The unit tests are placed in the tests folder. They can be ran from the root folder with the pytest command, as follows :
 
-    python -m pytest tests
-
-🐋 Containerizing the application 
-----------------------------------
-To build a Docker image:
-
-    sudo docker build --tag arxivparser .
-
-Or if you want to be able to push it later to your DockerHub:
-
-    sudo docker build --tag <your_docker_username>/arxivparser .
-
-Pushing the Docker image to your registry:
-
-    sudo docker push <your_docker_user_name>/arxivparser
-
-Running a Docker image:
-
-    sudo docker run --name arxivparser
-    
+    python -m pytest tests 
 
 ☁️ Deploying on EC2
 --------------------
@@ -87,4 +72,4 @@ You should now be able to connect to your EC2 instance:
 
     sudo ssh -i <path_to_your_key_pair> ubuntu@<ec2_instance_public_ipv4>
 
-Once connected, deploy and run the service as a container, as specified above
+Once connected, deploy and run the service as a container, or as specified above
