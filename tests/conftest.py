@@ -39,18 +39,22 @@ TIME_STEP = int(config["ArXivParser"]["time_step"])
 ARXIV_URL = config["ArXivParser"]["arxiv_url"]
 CAT = config["ArXivParser"]["cat"]
 MAX_RESULTS = int(config["ArXivParser"]["max_results"])
+MAX_CONCURRENT_REQUEST_THREADS = int(config["ArXivParser"]["max_concurrent_request_threads"])
 
 # [PDF Extractor]
-PDF_EXTRACTOR_URI = config["PDF Extractor"]["pdf_extractor_uri"]
+PDF_EXTRACTOR_URL = config["PDFExtractor"]["pdf_extractor_url"]
+API_KEY = config["PDFExtractor"]["api_key"]
 
 @pytest.fixture
 def arxiv_parser():
     return ArXivParser(
-        ARXIV_URL,
-        CAT,
-        MAX_RESULTS,
-        PDF_EXTRACTOR_URI,
-        TIME_STEP
+        arxiv_url = ARXIV_URL,
+        pdf_extractor_url = PDF_EXTRACTOR_URL,
+        api_key = API_KEY,
+        cat = CAT,
+        max_results = MAX_RESULTS,
+        time_step = TIME_STEP,
+        max_concurrent_request_threads = MAX_CONCURRENT_REQUEST_THREADS
         )
 
 @pytest.fixture

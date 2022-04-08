@@ -5,13 +5,14 @@ title = "Project default configuration"
 time_step = 604800 # 60 s x 60 min x 24 h x 7 j = 604800 s
 arxiv_url = "https://export.arxiv.org/api/"
 cat = 'cs.ai'
-max_results = 10
+max_results = 1000
+max_concurrent_request_threads = 50
   [["possible_cat"]]
   id = 1
   value = 'cs.ai'
 
 ["PDFExtractor"]
-pdf_extractor_uri = "https://lbninhtxlc.execute-api.eu-west-3.amazonaws.com/beta/test-function"
+pdf_extractor_url = "https://qp1s494gph.execute-api.eu-west-3.amazonaws.com/default/PDFExtractor"
 
 ["Redis"]
 broker_url = "redis://localhost:6379/0"
